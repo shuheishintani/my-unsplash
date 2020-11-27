@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-// const { PrismaClient } = require('@prisma/client');
-import { PrismaClient } from '@prisma/client';
+const { PrismaClient } = require('@prisma/client');
+// import { PrismaClient } from '@prisma/client';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const prisma = new PrismaClient({ log: ['query'] });

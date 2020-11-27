@@ -58,7 +58,7 @@ export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
     },
   });
 
-  const handleClose = (): void => {
+  const handleClose = () => {
     setOpen(false);
   };
 
