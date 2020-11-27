@@ -1,5 +1,8 @@
-import { useQuery, useMutation, queryCache } from 'react-query';
+import { useState } from 'react';
+import { useQuery } from 'react-query';
+import { FormDialog } from '@/components/FormDialog';
 import { Photo } from '@/types';
+import { Button } from '@material-ui/core';
 
 async function fetchPhotos() {
   const response = await fetch('/api/photos');
@@ -8,66 +11,17 @@ async function fetchPhotos() {
   return photos;
 }
 
-type PhotoDto = {
-  label: string;
-  url: string;
+const isError = (error: unknown): error is Error => {
+  return error instanceof Error;
 };
 
-async function createPhoto({ label, url }: PhotoDto) {
-  const response = await fetch('/api/photos', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ label, url }),
-  });
-  const data = await response.json();
-  const { photo } = data;
-  return photo;
-}
-
 export default function Home() {
+  const [open, setOpen] = useState<boolean>(false);
   const { status, data: photos, error } = useQuery('photos', fetchPhotos);
-  const [mutate] = useMutation(createPhoto, {
-    onMutate: photoData => {
-      queryCache.cancelQueries('all');
-
-      const prevPhotos: Photo[] | undefined = queryCache.getQueryData('photos');
-
-      if (prevPhotos) {
-        queryCache.setQueryData<Photo[]>('photos', [
-          {
-            id: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            ...photoData,
-          },
-          ...prevPhotos,
-        ]);
-      }
-
-      return () => queryCache.setQueryData('photos', prevPhotos);
-    },
-    onError: (_error, _photoData, rollback: () => void) => rollback(),
-    onSuccess: () => {
-      queryCache.invalidateQueries('photos');
-    },
-  });
-
-  const clickHandler = async () => {
-    try {
-      await mutate({ label: 'aaaaa', url: 'bbbbb' });
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
-
-  const isError = (error: unknown): error is Error => {
-    return error instanceof Error;
-  };
 
   if (status === 'error') {
     if (isError(error)) {
@@ -76,9 +30,17 @@ export default function Home() {
   }
   return (
     <>
+      <Button onClick={() => setOpen(true)} variant="contained" color="primary">
+        Add a Photo
+      </Button>
+      <FormDialog open={open} setOpen={setOpen} />
       {photos &&
-        photos.map((photo: Photo) => <p key={photo.id}>{photo.url}</p>)}
-      <button onClick={clickHandler}>ボタン</button>
+        photos.map((photo: Photo) => (
+          <p key={photo.id}>
+            {photo.label}
+            {photo.url}
+          </p>
+        ))}
     </>
   );
 }
