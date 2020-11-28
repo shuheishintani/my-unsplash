@@ -14,6 +14,7 @@ const fetchPhotos: (key: string, keyword: string) => Promise<Photo[]> = async (
   const response = await fetch(`/api/photos?keyword=${keyword}`);
   const data = await response.json();
   const { photos } = data;
+  console.log('fetch');
   return photos;
 };
 
@@ -72,7 +73,7 @@ export default function Home() {
   );
   const [mutate] = useMutation(deletePhoto, {
     onMutate: ({ id }) => {
-      queryCache.cancelQueries('all');
+      queryCache.cancelQueries('photos');
 
       const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
         'photos',
@@ -84,13 +85,15 @@ export default function Home() {
           ['photos', keyword],
           prevPhotos.filter(photo => photo.id !== id)
         );
+        console.log('setQuery');
       }
 
       return () => queryCache.setQueryData(['photos', keyword], prevPhotos);
     },
     onError: (_error, _photoData, rollback: () => void) => rollback(),
-    onSuccess: () => {
+    onSettled: () => {
       queryCache.invalidateQueries('photos');
+      console.log('invalidateQuery');
     },
   });
 
@@ -129,7 +132,7 @@ export default function Home() {
           {photos.map(photo => (
             <Box key={photo.id} className="item" m={2}>
               <Box className={classes.hoverParent}>
-                <img src={photo.url} width="400px" className={classes.img} />
+                <img src={photo.url} width="300px" className={classes.img} />
                 <Box className={classes.hoverMask}>
                   <Box
                     height="100%"

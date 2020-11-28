@@ -34,7 +34,7 @@ export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
   const [url, setUrl] = React.useState<string>('');
   const [mutate] = useMutation(createPhoto, {
     onMutate: photoData => {
-      queryCache.cancelQueries('all');
+      queryCache.cancelQueries('photos');
 
       const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
         'photos',
