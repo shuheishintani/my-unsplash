@@ -26,10 +26,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   if (req.method === 'GET') {
+    const { keyword } = req.query;
     try {
       const photos = await prisma.photo.findMany({
         orderBy: {
           createdAt: 'desc',
+        },
+        where: {
+          label: {
+            contains: keyword,
+          },
         },
       });
 

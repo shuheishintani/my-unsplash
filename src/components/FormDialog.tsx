@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 
-async function createPhoto({ label, url }: PhotoDto) {
+const createPhoto = async ({ label, url }: PhotoDto): Promise<Photo> => {
   const response = await fetch('/api/photos', {
     method: 'POST',
     headers: {
@@ -22,12 +22,12 @@ async function createPhoto({ label, url }: PhotoDto) {
   const data = await response.json();
   const { photo } = data;
   return photo;
-}
+};
 
-type Props = {
+interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
+}
 
 export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
   console.log('hoge');
