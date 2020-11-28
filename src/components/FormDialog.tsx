@@ -1,7 +1,5 @@
 import React from 'react';
-import { useMutation, queryCache } from 'react-query';
-import { Photo } from '@/types';
-import { PhotoDto } from '@/dto';
+import { useAddPhoto } from '@/hooks/useAddPhoto';
 import {
   Button,
   TextField,
@@ -11,19 +9,6 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 
-const createPhoto = async ({ label, url }: PhotoDto): Promise<Photo> => {
-  const response = await fetch('/api/photos', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ label, url }),
-  });
-  const data = await response.json();
-  const { photo } = data;
-  return photo;
-};
-
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,37 +17,7 @@ interface Props {
 export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
   const [label, setLabel] = React.useState<string>('');
   const [url, setUrl] = React.useState<string>('');
-  const [mutate] = useMutation(createPhoto, {
-    onMutate: photoData => {
-      queryCache.cancelQueries('photos');
-
-      const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
-        'photos',
-        '',
-      ]);
-
-      if (prevPhotos) {
-        queryCache.setQueryData<Photo[]>(
-          ['photos', ''],
-          [
-            {
-              id: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-              ...photoData,
-            },
-            ...prevPhotos,
-          ]
-        );
-      }
-
-      return () => queryCache.setQueryData(['photos', []], prevPhotos);
-    },
-    onError: (_error, _photoData, rollback: () => void) => rollback(),
-    onSettled: () => {
-      queryCache.invalidateQueries('photos');
-    },
-  });
-
+  const [mutate] = useAddPhoto();
   const handleClose = () => {
     setOpen(false);
   };
