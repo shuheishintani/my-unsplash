@@ -55,10 +55,10 @@ export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
         );
       }
 
-      return () => queryCache.setQueryData('photos', prevPhotos);
+      return () => queryCache.setQueryData(['photos', []], prevPhotos);
     },
     onError: (_error, _photoData, rollback: () => void) => rollback(),
-    onSuccess: () => {
+    onSettled: () => {
       queryCache.invalidateQueries('photos');
     },
   });

@@ -54,7 +54,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         where: { id },
       });
 
-      res.status(204);
+      res.status(200);
       res.json({ photo });
     } catch (e) {
       res.status(500);

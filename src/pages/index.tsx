@@ -86,7 +86,7 @@ export default function Home() {
         );
       }
 
-      return () => queryCache.setQueryData('photos', prevPhotos);
+      return () => queryCache.setQueryData(['photos', keyword], prevPhotos);
     },
     onError: (_error, _photoData, rollback: () => void) => rollback(),
     onSuccess: () => {
