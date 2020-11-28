@@ -30,24 +30,29 @@ interface Props {
 }
 
 export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
-  console.log('hoge');
   const [label, setLabel] = React.useState<string>('');
   const [url, setUrl] = React.useState<string>('');
   const [mutate] = useMutation(createPhoto, {
     onMutate: photoData => {
       queryCache.cancelQueries('all');
 
-      const prevPhotos: Photo[] | undefined = queryCache.getQueryData('photos');
+      const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
+        'photos',
+        '',
+      ]);
 
       if (prevPhotos) {
-        queryCache.setQueryData<Photo[]>('photos', [
-          {
-            id: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            ...photoData,
-          },
-          ...prevPhotos,
-        ]);
+        queryCache.setQueryData<Photo[]>(
+          ['photos', ''],
+          [
+            {
+              id: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+              ...photoData,
+            },
+            ...prevPhotos,
+          ]
+        );
       }
 
       return () => queryCache.setQueryData('photos', prevPhotos);

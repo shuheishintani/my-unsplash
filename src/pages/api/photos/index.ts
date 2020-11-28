@@ -16,18 +16,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(201);
       res.json({ photo });
     } catch (e) {
-      console.error(e);
-
       res.status(500);
-      res.json({ error: 'Sorry unable to save photo to database' });
+      res.json({ error: 'Sorry unable to save a photo to database' });
     } finally {
       await prisma.$disconnect();
     }
   }
 
   if (req.method === 'GET') {
-    const { keyword } = req.query;
     try {
+      const { keyword } = req.query;
       const photos = await prisma.photo.findMany({
         orderBy: {
           createdAt: 'desc',
@@ -42,10 +40,25 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(200);
       res.json({ photos });
     } catch (e) {
-      console.error(e);
-
       res.status(500);
       res.json({ error: 'Sorry unable to fetch photos from database' });
+    } finally {
+      await prisma.$disconnect();
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    try {
+      const { id } = req.body;
+      const photo = await prisma.photo.delete({
+        where: { id },
+      });
+
+      res.status(204);
+      res.json({ photo });
+    } catch (e) {
+      res.status(500);
+      res.json({ error: 'Sorry unable to delete a photo ' });
     } finally {
       await prisma.$disconnect();
     }
