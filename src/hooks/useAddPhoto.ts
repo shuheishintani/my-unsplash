@@ -2,7 +2,10 @@ import { useMutation, queryCache } from 'react-query';
 import { Photo } from '@/types';
 import { PhotoDto } from '@/dto';
 
-const createPhoto = async ({ label, url }: PhotoDto): Promise<Photo> => {
+const createPhoto: ({ label, url }: PhotoDto) => Promise<Photo> = async ({
+  label,
+  url,
+}) => {
   const response = await fetch('/api/photos', {
     method: 'POST',
     headers: {
@@ -18,6 +21,7 @@ const createPhoto = async ({ label, url }: PhotoDto): Promise<Photo> => {
 export const useAddPhoto = () => {
   return useMutation(createPhoto, {
     onMutate: photoData => {
+      console.log('cancelQueries');
       queryCache.cancelQueries('photos');
 
       const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
@@ -43,6 +47,7 @@ export const useAddPhoto = () => {
     },
     onError: (_error, _photoData, rollback: () => void) => rollback(),
     onSettled: () => {
+      console.log('invalidateQueries');
       queryCache.invalidateQueries('photos');
     },
   });

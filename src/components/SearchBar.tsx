@@ -1,24 +1,35 @@
 import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { TextField } from '@material-ui/core';
 
 interface Props {
   setKeyword: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const SearchBar: React.FC<Props> = ({ setKeyword }) => {
-  const [tmpKeyword, setTemKeyword] = React.useState<string>('');
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setTemKeyword(e.currentTarget.value);
-  };
+const validationSchema = Yup.object({
+  keyword: Yup.string(),
+});
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    setKeyword(tmpKeyword);
-  };
+export const SearchBar: React.FC<Props> = ({ setKeyword }) => {
+  const formik = useFormik({
+    initialValues: {
+      keyword: '',
+    },
+    onSubmit: async values => {
+      setKeyword(values.keyword);
+    },
+    validationSchema,
+  });
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TextField onChange={handleInput} />
+    <form onSubmit={formik.handleSubmit}>
+      <TextField
+        name="keyword"
+        variant="outlined"
+        onChange={formik.handleChange}
+        value={formik.values.keyword}
+      />
     </form>
   );
 };

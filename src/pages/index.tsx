@@ -3,7 +3,6 @@ import { useFetchPhotos } from '@/hooks/useFetchPhotos';
 import { useDeletePhoto } from '@/hooks/useDeletePhoto';
 import { FormDialog } from '@/components/FormDialog';
 import { SearchBar } from '@/components/SearchBar';
-import { Photo } from '@/types';
 import { Button, Box, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Masonry from 'react-masonry-component';

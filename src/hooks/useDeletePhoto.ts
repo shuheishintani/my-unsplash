@@ -1,7 +1,9 @@
 import { useMutation, queryCache } from 'react-query';
 import { Photo } from '@/types';
 
-const deletePhoto = async ({ id }: { id: string }): Promise<Photo> => {
+const deletePhoto: ({ id }: { id: string }) => Promise<Photo> = async ({
+  id,
+}) => {
   const response = await fetch('/api/photos', {
     method: 'DELETE',
     headers: {
