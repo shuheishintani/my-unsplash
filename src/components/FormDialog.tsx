@@ -1,7 +1,8 @@
 import React from 'react';
-import { useMutation, queryCache } from 'react-query';
-import { Photo } from '@/types';
+import { useAddPhoto } from '@/hooks/useAddPhoto';
 import { PhotoDto } from '@/dto';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import {
   Button,
   TextField,
@@ -9,86 +10,45 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from '@material-ui/core';
-
-const createPhoto = async ({ label, url }: PhotoDto): Promise<Photo> => {
-  const response = await fetch('/api/photos', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ label, url }),
-  });
-  const data = await response.json();
-  const { photo } = data;
-  return photo;
-};
 
 interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const validationSchema = Yup.object({
+  label: Yup.string().required('Required'),
+
+  url: Yup.string()
+    .required('Required')
+    .matches(/^(?=https:\/\/)(?=.*.(jpeg|jpg|gif|png))/, {
+      message: 'Invalid Url',
+    }),
+});
+
 export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
-  const [label, setLabel] = React.useState<string>('');
-  const [url, setUrl] = React.useState<string>('');
-  const [mutate] = useMutation(createPhoto, {
-    onMutate: photoData => {
-      queryCache.cancelQueries('photos');
-
-      const prevPhotos: Photo[] | undefined = queryCache.getQueryData([
-        'photos',
-        '',
-      ]);
-
-      if (prevPhotos) {
-        queryCache.setQueryData<Photo[]>(
-          ['photos', ''],
-          [
-            {
-              id: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-              ...photoData,
-            },
-            ...prevPhotos,
-          ]
-        );
+  const [mutate] = useAddPhoto();
+  const formik = useFormik({
+    initialValues: {
+      label: '',
+      url: '',
+    },
+    onSubmit: async (values: PhotoDto) => {
+      try {
+        setOpen(false);
+        await mutate(values);
+      } catch (e) {
+        console.log(e);
       }
-
-      return () => queryCache.setQueryData(['photos', []], prevPhotos);
     },
-    onError: (_error, _photoData, rollback: () => void) => rollback(),
-    onSettled: () => {
-      queryCache.invalidateQueries('photos');
-    },
+    validationSchema,
   });
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  const handleSubmit = async () => {
-    try {
-      setOpen(false);
-      await mutate({ label, url });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const handleLabelInput = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLabel(e.currentTarget.value);
-    },
-    []
-  );
-
-  const handleUrlInput = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setUrl(e.currentTarget.value);
-    },
-    []
-  );
 
   return (
     <Dialog
@@ -97,30 +57,48 @@ export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">Add a new photo</DialogTitle>
-      <DialogContent>
-        <TextField
-          label="Label"
-          variant="outlined"
-          margin="dense"
-          fullWidth
-          onChange={handleLabelInput}
-        />
-        <TextField
-          label="Photo URL"
-          variant="outlined"
-          margin="dense"
-          fullWidth
-          onChange={handleUrlInput}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} color="primary" variant="contained">
-          Submit
-        </Button>
-      </DialogActions>
+      <form onSubmit={formik.handleSubmit}>
+        <DialogContent style={{ width: '400px' }}>
+          <TextField
+            label="Label"
+            name="label"
+            variant="outlined"
+            margin="dense"
+            fullWidth
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.label}
+          />
+          {formik.touched.label && formik.errors.label && (
+            <Typography variant="body2" color="secondary">
+              {formik.errors.label}
+            </Typography>
+          )}
+          <TextField
+            label="Photo URL"
+            name="url"
+            variant="outlined"
+            margin="dense"
+            fullWidth
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.url}
+          />
+          {formik.touched.url && formik.errors.url && (
+            <Typography variant="body2" color="secondary">
+              {formik.errors.url}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button type="submit" color="primary" variant="contained">
+            Submit
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };
