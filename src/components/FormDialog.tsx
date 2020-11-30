@@ -2,7 +2,7 @@ import React from 'react';
 import { useAddPhoto } from '@/hooks/useAddPhoto';
 import { PhotoDto } from '@/dto';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { addPhotoSchema } from '@/validation';
 import {
   Button,
   TextField,
@@ -17,16 +17,6 @@ interface Props {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-const validationSchema = Yup.object({
-  label: Yup.string().required('Required'),
-
-  url: Yup.string()
-    .required('Required')
-    .matches(/^(?=https:\/\/)(?=.*.(jpeg|jpg|gif|png))/, {
-      message: 'Invalid Url',
-    }),
-});
 
 export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
   const [mutate] = useAddPhoto();
@@ -43,7 +33,7 @@ export const FormDialog: React.FC<Props> = ({ open, setOpen }) => {
         console.log(e);
       }
     },
-    validationSchema,
+    validationSchema: addPhotoSchema,
   });
 
   const handleClose = () => {

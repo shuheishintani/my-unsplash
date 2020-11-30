@@ -3,7 +3,7 @@ import { useFetchPhotos } from '@/hooks/useFetchPhotos';
 import { useDeletePhoto } from '@/hooks/useDeletePhoto';
 import { FormDialog } from '@/components/FormDialog';
 import { SearchBar } from '@/components/SearchBar';
-import { Button, Box, Typography } from '@material-ui/core';
+import { Button, Box, Typography, Container, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Masonry from 'react-masonry-component';
 
@@ -37,7 +37,15 @@ const useStyles = makeStyles({
   deleteBtn: {
     borderRadius: 32,
   },
+  masonry: {
+    margin: '0 auto',
+  },
 });
+
+const masonryOptions = {
+  transitionDuration: 0,
+  fitWidth: true,
+};
 
 export default function Home() {
   const classes = useStyles();
@@ -70,18 +78,30 @@ export default function Home() {
   };
 
   return (
-    <>
-      <SearchBar setKeyword={setKeyword} />
-      <Button onClick={handleClick} variant="contained" color="primary">
-        Add a Photo
-      </Button>
+    <Container maxWidth="xl">
+      <Box
+        display="flex"
+        my={5}
+        maxWidth={1300}
+        style={{ margin: '30px auto' }}
+      >
+        <Box display="flex" flexGrow={1}>
+          <img src="my_unsplash_logo.svg" alt="" />
+          <SearchBar setKeyword={setKeyword} />
+        </Box>
+        <Button onClick={handleClick} variant="contained" color="primary">
+          Add a Photo
+        </Button>
+      </Box>
+
       <FormDialog open={open} setOpen={setOpen} />
+
       {photos && (
-        <Masonry>
+        <Masonry className={classes.masonry} options={masonryOptions}>
           {photos.map(photo => (
             <Box key={photo.id} className="item" m={2}>
               <Box className={classes.hoverParent}>
-                <img src={photo.url} width="300px" className={classes.img} />
+                <img src={photo.url} className={classes.img} width="300px" />
                 <Box className={classes.hoverMask}>
                   <Box
                     height="100%"
@@ -108,6 +128,6 @@ export default function Home() {
           ))}
         </Masonry>
       )}
-    </>
+    </Container>
   );
 }

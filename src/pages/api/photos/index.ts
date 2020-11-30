@@ -1,23 +1,24 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PrismaClient } = require('@prisma/client');
-// import { PrismaClient } from '@prisma/client';
+import { addPhotoSchema } from '@/validation';
+import { PhotoDto } from '@/dto';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const prisma = new PrismaClient({ log: ['query'] });
 
   if (req.method === 'POST') {
     try {
-      const { label, url } = req.body;
+      const validatedData = await addPhotoSchema.validate(req.body);
+      const { label, url } = validatedData as PhotoDto;
       const photo = await prisma.photo.create({
         data: { label, url },
       });
-
       res.status(201);
       res.json({ photo });
     } catch (e) {
       res.status(500);
-      res.json({ error: 'Sorry unable to save a photo to database' });
+      res.json({ error: e.message });
     } finally {
       await prisma.$disconnect();
     }
@@ -41,7 +42,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.json({ photos });
     } catch (e) {
       res.status(500);
-      res.json({ error: 'Sorry unable to fetch photos from database' });
+      res.json({ error: e.message });
     } finally {
       await prisma.$disconnect();
     }
@@ -58,7 +59,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res.json({ photo });
     } catch (e) {
       res.status(500);
-      res.json({ error: 'Sorry unable to delete a photo ' });
+      res.json({ error: e.message });
     } finally {
       await prisma.$disconnect();
     }

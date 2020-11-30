@@ -52,16 +52,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     },
   ];
 
-  try {
-    photos.forEach(async photo => {
-      await prisma.photo.create({ data: photo });
-    });
+  const promiseArr = photos.map(photo => {
+    return prisma.photo.create({ data: photo });
+  });
 
+  try {
+    await Promise.all(promiseArr);
     res.status(201);
     res.end();
   } catch (e) {
     res.status(500);
-    res.json({ error: 'Sorry unable to save a photo to database' });
+    res.json({ error: e.message });
   } finally {
     await prisma.$disconnect();
   }
