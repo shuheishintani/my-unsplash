@@ -82,11 +82,13 @@ export default function Home() {
       <Box
         display="flex"
         my={5}
-        maxWidth={1300}
-        style={{ margin: '30px auto' }}
+        maxWidth={1700}
+        minWidth={550}
+        style={{ margin: '30px auto 50px' }}
       >
         <Box display="flex" flexGrow={1}>
           <img src="my_unsplash_logo.svg" alt="" />
+          <Box m={2} />
           <SearchBar setKeyword={setKeyword} />
         </Box>
         <Button onClick={handleClick} variant="contained" color="primary">
@@ -101,7 +103,7 @@ export default function Home() {
           {photos.map(photo => (
             <Box key={photo.id} className="item" m={2}>
               <Box className={classes.hoverParent}>
-                <img src={photo.url} className={classes.img} width="300px" />
+                <img src={photo.url} className={classes.img} width="400px" />
                 <Box className={classes.hoverMask}>
                   <Box
                     height="100%"
