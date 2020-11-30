@@ -43,7 +43,6 @@ const useStyles = makeStyles({
 });
 
 const masonryOptions = {
-  transitionDuration: 0,
   fitWidth: true,
 };
 
@@ -78,7 +77,7 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="xl">
+    <>
       <Box
         display="flex"
         my={5}
@@ -130,6 +129,6 @@ export default function Home() {
           ))}
         </Masonry>
       )}
-    </Container>
+    </>
   );
 }
